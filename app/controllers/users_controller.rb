@@ -19,6 +19,7 @@ class UsersController < ApplicationController
 
   def show
     @user = User.find(params[:id])
+    @microposts = @user.microposts.paginate(page: params[:page])
   end
 
   def new
@@ -60,15 +61,13 @@ class UsersController < ApplicationController
     params.require(:user).permit(:name,:email,:password,:password_confirmation)
   end
 
-  # Check if user already logged in 
-  def logged_in_user
-    unless logged_in?
-      flash[:danger] = "Please log in first"
-      redirect_to login_url
-    end
+  # Check if it's correct user
+  def correct_user
+    @user = User.find(params[:id])
+    redirect_to(root_url) unless @user == current_user
   end
 
-  # Check if it's correct user
-  @user = User.find(params[:id])
-  redirect_to(root_url) unless @user == current_user
+  def admin_user
+    redirect_to(root_url) unless current_user.admin?
+  end
 end
